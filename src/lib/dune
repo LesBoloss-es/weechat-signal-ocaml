@@ -1,0 +1,4 @@
+(library
+ (public_name signal)
+ (name signal)
+ (libraries yojson))

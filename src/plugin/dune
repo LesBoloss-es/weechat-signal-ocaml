@@ -1,0 +1,9 @@
+(executable
+ (name signal_weechat_ocaml)
+ (flags -runtime-variant _pic)
+ (modes (native object))
+ (foreign_stubs
+  (language c)
+  (flags -fPIC)
+  (names description))
+ (libraries weechat.api weechat.plugin unix signal))
