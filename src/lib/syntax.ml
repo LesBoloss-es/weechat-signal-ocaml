@@ -4,3 +4,5 @@ let (and+) x y =
   match x, y with
   | Ok x, Ok y -> Ok (x, y)
   | (Error e, _ | _, Error e) -> Error e
+
+let (>>=) = Result.bind
