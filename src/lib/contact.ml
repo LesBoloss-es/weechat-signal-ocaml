@@ -32,3 +32,7 @@ let parse json =
     | Error _ -> ""
   in
   {name; number; uuid}
+
+let parse_contact_list json =
+  let* list = Json.as_list json in
+  try_list parse list
