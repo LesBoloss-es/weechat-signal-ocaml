@@ -7,7 +7,8 @@ let (and+) x y =
 
 let (>>=) = Result.bind
 
-let or_else x y =
+(* or_else *)
+let (<|>) x y =
   match x with
   | Ok _ -> x
   | Error _ -> y

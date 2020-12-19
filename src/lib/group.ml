@@ -45,11 +45,11 @@ let parse_v2 json =
 let parse_group_list json =
   let* assoc = Json.as_assoc json in
   let+ groupsv1 =
-    or_else (Json.assoc_get "groups" assoc) (Ok (`Assoc []))
+    (Json.assoc_get "groups" assoc <|> Ok (`Assoc []))
     >>= Json.as_list
     >>= try_list parse_v1
   and+ groupsv2 =
-    or_else (Json.assoc_get "groupsv2" assoc) (Ok (`Assoc []))
+    (Json.assoc_get "groupsv2" assoc <|> Ok (`Assoc []))
     >>= Json.as_list
     >>= try_list parse_v2
   in
