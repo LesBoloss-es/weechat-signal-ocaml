@@ -8,6 +8,9 @@ type t = {
   id: string;
 }
 
+let make ~version ~title ~id =
+  {version; title; id}
+
 (** {2 Pretty printing} *)
 
 (** Mostly for debugging purpose *)

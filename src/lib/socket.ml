@@ -25,6 +25,8 @@ let print_line sock =
 let subscribe sock username =
   print_line sock {|{"type": "subscribe", "username": "%s"}|} username
 
-
 let list_groups sock username =
   print_line sock {|{"type": "list_groups", "username": "%s"}|} username
+
+let list_contacts sock username =
+  print_line sock {|{"type": "list_contacts", "username": "%s"}|} username
