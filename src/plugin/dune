@@ -6,4 +6,4 @@
   (language c)
   (flags -fPIC)
   (names description))
- (libraries weechat.api weechat.plugin unix signal))
+ (libraries weechat.api weechat.plugin unix weechat-signal-ocaml.lib))
