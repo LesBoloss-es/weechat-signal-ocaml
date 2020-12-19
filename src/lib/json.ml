@@ -12,6 +12,13 @@ let parse_error fmt =
     fmt
 
 
+(** {2 List helpers} *)
+
+let as_list = function
+  | `List l -> Ok l
+  | json -> parse_error "Not a list: %a" pp json
+
+
 (** {2 Assocative list helpers} *)
 
 let as_assoc = function

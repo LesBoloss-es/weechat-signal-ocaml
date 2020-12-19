@@ -6,3 +6,8 @@ let (and+) x y =
   | (Error e, _ | _, Error e) -> Error e
 
 let (>>=) = Result.bind
+
+let or_else x y =
+  match x with
+  | Ok _ -> x
+  | Error _ -> y

@@ -41,3 +41,27 @@ let parse_v2 json =
   let+ title = Json.as_string title
   and+ id = Json.as_string id in
   {title; version = V2; id}
+
+let parse_list elt_parser =
+  let rec parse_with_early_exit parsed = function
+    | [] -> Ok parsed
+    | x :: xs ->
+      begin match elt_parser x with
+      | Ok x -> parse_with_early_exit (x :: parsed) xs
+      | Error _ as err -> err
+      end
+  in
+  parse_with_early_exit []
+
+let parse_group_list json =
+  let* assoc = Json.as_assoc json in
+  let+ groupsv1 =
+    or_else (Json.assoc_get "groups" assoc) (Ok (`Assoc []))
+    >>= Json.as_list
+    >>= parse_list parse_v1
+  and+ groupsv2 =
+    or_else (Json.assoc_get "groupsv2" assoc) (Ok (`Assoc []))
+    >>= Json.as_list
+    >>= parse_list parse_v2
+  in
+  groupsv1 @ groupsv2
