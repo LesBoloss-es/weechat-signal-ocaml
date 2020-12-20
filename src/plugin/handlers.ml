@@ -7,6 +7,9 @@ module Json = Signal.Json
 let subscribed buffer =
   Ok (Weechat.printf buffer "subscribed")
 
+let listen_started buffer =
+  Ok (Weechat.printf buffer "listen started")
+
 let group_list assoc =
   let* group_list = Json.assoc_get "data" assoc >>= GroupList.of_yojson in
   let* () =

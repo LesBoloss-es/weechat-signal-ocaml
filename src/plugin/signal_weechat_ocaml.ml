@@ -31,6 +31,7 @@ let process_line buffer line =
   let* typ = Json.assoc_get "type" assoc >>= Json.as_string in
   match typ with
   | "subscribed" -> Handlers.subscribed buffer
+  | "listen_started" -> Handlers.listen_started buffer
   | "group_list" -> Handlers.group_list assoc
   | "contact_list" -> Handlers.contact_list assoc 
   | _ ->
