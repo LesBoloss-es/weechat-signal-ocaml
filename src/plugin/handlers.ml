@@ -5,10 +5,14 @@ open Api
 module Json = Signal.Json
 
 let subscribed buffer =
-  Ok (Weechat.printf buffer "subscribed")
+  match Weechat.prefix "network" with
+  | Some info -> Ok (Weechat.printf buffer "%ssubscribed" info)
+  | None -> Error "Weechat.prefix error"
 
 let listen_started buffer =
-  Ok (Weechat.printf buffer "listen started")
+  match Weechat.prefix "network" with
+  | Some info -> Ok (Weechat.printf buffer "%slisten started" info)
+  | None -> Error "Weechat.prefix error"
 
 let group_list assoc =
   let* group_list = Json.assoc_get "data" assoc >>= GroupList.of_yojson in

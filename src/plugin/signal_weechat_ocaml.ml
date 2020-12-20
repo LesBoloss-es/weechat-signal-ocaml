@@ -34,8 +34,7 @@ let process_line buffer line =
   | "listen_started" -> Handlers.listen_started buffer
   | "group_list" -> Handlers.group_list assoc
   | "contact_list" -> Handlers.contact_list assoc 
-  | _ ->
-    Ok (Weechat.printf buffer "unhandled message from signald: %s" line)
+  | _ -> error "unhandled message from signald: %s" line
 
 let plugin_init () =
   let main_buffer =
@@ -46,7 +45,9 @@ let plugin_init () =
   in
 
   let error msg =
-    Weechat.printf main_buffer "[Error] %s" msg;
+    (match Weechat.prefix "error" with
+    | Some error -> Weechat.printf main_buffer "%s%s" error msg
+    | None -> Weechat.printf main_buffer "%s" msg);
     -1
   in
 
