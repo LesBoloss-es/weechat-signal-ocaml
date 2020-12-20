@@ -33,8 +33,10 @@ let process_line buffer line =
   | "subscribed" -> Handlers.subscribed buffer
   | "listen_started" -> Handlers.listen_started buffer
   | "group_list" -> Handlers.group_list assoc
-  | "contact_list" -> Handlers.contact_list assoc 
-  | _ -> error "unhandled message from signald: %s" line
+  | "contact_list" -> Handlers.contact_list assoc
+  | "message" -> Handlers.message assoc
+  | _ -> error "unhandled input"
+
 
 let plugin_init () =
   let main_buffer =
@@ -44,11 +46,12 @@ let plugin_init () =
       (fun _ -> 0)
   in
 
-  let error msg =
-    (match Weechat.prefix "error" with
-    | Some error -> Weechat.printf main_buffer "%s%s" error msg
-    | None -> Weechat.printf main_buffer "%s" msg);
-    -1
+  let error =
+    let print = match Weechat.prefix "error" with
+      | Some error -> Weechat.printf main_buffer "%s%s" error
+      | None -> Weechat.printf main_buffer "%s"
+    in
+    fun msg -> print msg; -1
   in
 
   let socket = Socket.create "/run/signald/signald.sock" in
@@ -72,9 +75,12 @@ let plugin_init () =
     ~flag_write:false
     (fun _ ->
       try
-        begin match process_line main_buffer (input_line socket.ic) with
+        let line = input_line socket.ic in
+        begin match process_line main_buffer line with
           | Ok () -> 0
-          | Error msg -> error msg
+          | Error msg ->
+            let _ = error ("On input: " ^ line) in
+            error msg
         end
       with End_of_file -> 0)
   in

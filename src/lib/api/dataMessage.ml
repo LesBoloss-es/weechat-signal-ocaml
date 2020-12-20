@@ -1,7 +1,7 @@
 type t = {
   timestamp:        Int64.t;
   attachments:      Attachment.t list     [@default []];
-  body:             string                [@default ""];
+  body:             string option         [@default None];
   group:            GroupInfo.t option    [@default None];
   groupV2:          GroupV2Info.t option  [@default None];
   endSession:       bool;

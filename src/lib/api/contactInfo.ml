@@ -10,6 +10,9 @@ type t = {
 
 (** {2 Getters} *)
 
-let name c = match c.name with
-  | Some n -> Ok n
-  | None -> Helpers.error "No name for contact %a" pp c
+let nice_name c =
+  match c.name, c.address.number, c.address.uuid with
+  | Some n, _, _
+  | None, Some n, _
+  | None, None, Some n -> Ok n
+  | _ -> Error "No nice_name for this contact"

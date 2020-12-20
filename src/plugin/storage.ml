@@ -8,7 +8,7 @@ module Contacts = struct
 
   let update (c: ContactInfo.t) =
     let* number = Address.number c.address in
-    let+ name = ContactInfo.name c <|> Ok number in
+    let+ name = ContactInfo.nice_name c in
     match Hashtbl.find_opt table number with
     | None ->
       let buffer = Weechat.buffer_new
@@ -24,6 +24,12 @@ module Contacts = struct
         Hashtbl.replace table number (c, buffer)
         (* TODO: rename the buffer *)
       end
+
+  let get (a: Address.t) =
+    let* number = Address.number a in
+    match Hashtbl.find_opt table number with
+    | None -> Error "Contact not found"
+    | Some (c, b) -> Ok (c, b)
 end
 
 module Groups = struct
@@ -49,6 +55,12 @@ module Groups = struct
         Hashtbl.replace table id (group, buffer);
         (* TODO: rename the buffer *)
       end
+
+  let get (g: Group.t) =
+    let* id = Group.id g in
+    match Hashtbl.find_opt table id with
+    | None -> Error "Group not found"
+    | Some (g, b) -> Ok (g, b)
 end
 
 let username = ref ""

@@ -26,6 +26,7 @@ module Syntax = struct
     | (Error e, _ | _, Error e) -> Error e
 
   let (>>=) = Result.bind
+  let (<$>) = Result.map
 
   (* or_else *)
   let (<|>) x y =
