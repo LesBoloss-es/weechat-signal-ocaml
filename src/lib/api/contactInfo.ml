@@ -4,7 +4,7 @@ type t = {
   color:                 string option [@default None];
   profileKey:            string option [@default None];
   messageExpirationTime: int;
-  inboxPosition:         int;
+  inboxPosition:         int option    [@default None];
 } [@@deriving of_yojson, show]
 
 
