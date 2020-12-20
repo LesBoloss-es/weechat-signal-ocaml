@@ -5,7 +5,7 @@ type t = {
   members:            Address.t list option [@default None];
   pendingMembers:     Address.t list option [@default None];
   requestingMembers:  Address.t list option [@default None];
-  revision:           int option            [@default None];
-  timer:              int option            [@default None];
+  revision:           int;
+  timer:              int;
   title:              string option         [@default None];
 } [@@deriving of_yojson, show]

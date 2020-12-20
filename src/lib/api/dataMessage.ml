@@ -5,7 +5,7 @@ type t = {
   group:            GroupInfo.t option    [@default None];
   groupV2:          GroupV2Info.t option  [@default None];
   endSession:       bool;
-  expiresInSeconds: int option            [@default None];
+  expiresInSeconds: int; (* Zero means: never expires. *)
   profileKeyUpdate: bool;
   quote:            Quote.t option        [@default None];
   contacts:         SharedContact.t list  [@default []];

@@ -3,8 +3,8 @@ type t = {
   address:               Address.t;
   color:                 string option [@default None];
   profileKey:            string option [@default None];
-  messageExpirationTime: int option    [@default None];
-  inboxPosition:         int option    [@default None];
+  messageExpirationTime: int;
+  inboxPosition:         int;
 } [@@deriving of_yojson, show]
 
 

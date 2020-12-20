@@ -3,7 +3,7 @@ type low_level = {
 
   uuid: string option [@default None];
   source: Address.t option [@default None];
-  sourceDevice: int option [@default None];
+  sourceDevice: int;
   relay: string option [@default None];
 
   typ: string [@key "type"];
@@ -34,7 +34,7 @@ type t = {
 
   uuid: string option;
   source: Address.t option;
-  sourceDevice: int option;
+  sourceDevice: int;
   relay: string option;
 
   typ: string;
