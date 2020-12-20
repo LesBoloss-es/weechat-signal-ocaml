@@ -1,4 +1,5 @@
 (library
  (public_name weechat-signal-ocaml.lib)
  (name signal)
- (libraries yojson))
+ (libraries yojson ppx_deriving_yojson.runtime)
+ (preprocess (pps ppx_deriving_yojson)))
