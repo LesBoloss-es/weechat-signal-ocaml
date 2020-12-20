@@ -1,7 +1,7 @@
 type t = {
-  number: string option;
-  uuid: string option;
-  relay: string option;
+  number: string option [@default None];
+  uuid:   string option [@default None];
+  relay:  string option [@default None];
 } [@@deriving of_yojson, show]
 
 
