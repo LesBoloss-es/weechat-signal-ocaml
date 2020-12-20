@@ -70,14 +70,12 @@ let signal_command_cb socket buffer argv argv_eol =
         Socket.list_contacts socket !Config.username
       end
     | "sync" ->
-      if argc <> 3 then Error "/signal sync: wrong number of arguments"
-      else begin match argv.(2) with
-        | "groups" ->
-          if !Config.username = ""
-          then Error "Please subscribe first"
-          else Socket.list_groups socket !Config.username
-        | _ -> Error "/signal sync: invalid argument"
-      end
+      if argc <> 2 then Error "/signal sync: wrong number of arguments"
+      else if !Config.username = "" then Error "Please subscribe first"
+      else
+        let* () = Socket.list_groups socket !Config.username in
+        let* () = Socket.list_contacts socket !Config.username in
+        Ok ()
     | _ -> Error "/signal: invalid argument"
 
 let process_line buffer line =
@@ -117,10 +115,10 @@ let plugin_init () =
   let _ = Weechat.hook_command
     "signal"
     "Interact with signal-weechat-ocaml"
-    "sync [groups | contacts] | subscribe NUMBER"
-    "sync [groups | contacts]: refresh the list of contacts/groups\n\
+    "sync | subscribe NUMBER"
+    "sync: refresh contact and group list\n\
      subscribe: start receiving message for the given account"
-     "sync groups || sync contacts || subscribe"
+     "sync || subscribe"
      (fun buf argv argv_eol ->
        match signal_command_cb socket buf argv argv_eol with
        | Ok () -> 0
