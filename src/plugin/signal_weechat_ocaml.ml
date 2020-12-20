@@ -8,20 +8,22 @@ open Syntax
 module Contacts = struct
   let table = Hashtbl.create 17
 
-  let update (c: Contact.t) =
-    match Hashtbl.find_opt table c.uuid with
+  let update (c: ContactInfo.t) =
+    let* number = Address.number c.address in
+    let+ name = ContactInfo.name c <|> Ok number in
+    match Hashtbl.find_opt table number with
     | None ->
       let buffer = Weechat.buffer_new
-        (Contact.nice_name c)
+        name
         (fun buffer _ ->
           Weechat.printf buffer "[writing to contact not yet implemented]";
           0)
         (fun _ -> 0)
       in
-      Hashtbl.add table c.uuid (c, buffer)
+      Hashtbl.add table number (c, buffer)
     | Some (c', buffer) ->
-      if c'.name <> c.name then begin
-        Hashtbl.replace table c.uuid (c, buffer)
+      if c' <> c then begin
+        Hashtbl.replace table number (c, buffer)
         (* TODO: rename the buffer *)
       end
 end
@@ -88,9 +90,12 @@ let process_line buffer line =
     let* () = try_list_iter (fun gi -> Groups.update (V1 gi)) group_list.groups in
     try_list_iter (fun gi -> Groups.update (V2 gi)) group_list.groupsv2
   | "contact_list" ->
-    let* data = Json.assoc_get "data" assoc in
-    let+ contacts = Contact.parse_contact_list data in
-    List.iter Contacts.update contacts
+    let* contact_list =
+      Json.assoc_get "data" assoc
+      >>= Json.as_list
+      >>= try_list_map (ContactInfo.of_yojson)
+    in
+    try_list_iter Contacts.update contact_list
   | _ ->
     Ok (Weechat.printf buffer "unhandled message from signald: %s" line)
 
