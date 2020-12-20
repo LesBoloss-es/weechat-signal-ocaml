@@ -1,6 +1,3 @@
-open Syntax
-
-
 type t = {
   name: string;
   uuid: string;
@@ -22,6 +19,7 @@ let pp fmt c =
 (** {2 Signald parsing} *)
 
 let parse json =
+  let open Helpers.Syntax in
   let* assoc = Json.as_assoc json in
   let* address = Json.assoc_get "address" assoc >>= Json.as_assoc in
   let+ uuid = Json.assoc_get "uuid" address >>= Json.as_string
@@ -34,5 +32,6 @@ let parse json =
   {name; number; uuid}
 
 let parse_contact_list json =
+  let open Helpers.Syntax in
   let* list = Json.as_list json in
-  try_list parse list
+  Helpers.try_list_map parse list

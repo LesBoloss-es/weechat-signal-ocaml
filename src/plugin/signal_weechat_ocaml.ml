@@ -1,5 +1,8 @@
 open Weechat_api
+
+open Api
 open Signal
+open Helpers
 open Syntax
 
 module Contacts = struct
@@ -24,23 +27,26 @@ module Contacts = struct
 end
 
 module Groups = struct
-  let table = Hashtbl.create 17
+  type item = Group.t * Weechat.gui_buffer
+  let table: (string, item) Hashtbl.t = Hashtbl.create 17
 
-  let update (g: Group.t) =
-    match Hashtbl.find_opt table g.id with
+  let update group =
+    let* id = Group.id group in
+    let+ title = Group.title group <|> Ok id in
+    match Hashtbl.find_opt table id with
     | None ->
       let buffer =
         Weechat.buffer_new
-          (if g.title <> "" then g.title else g.id)
+          title
           (fun buffer _ ->
             Weechat.printf buffer "[writing to group not yet implemented]";
             0)
           (fun _ -> 0)
       in
-      Hashtbl.add table g.id (g, buffer)
-    | Some (g', buffer) ->
-      if g'.title <> g.title then begin
-        Hashtbl.replace table g.id (g, buffer);
+      Hashtbl.add table id (group, buffer)
+    | Some (group', buffer) ->
+      if group' <> group then begin
+        Hashtbl.replace table id (group, buffer);
         (* TODO: rename the buffer *)
       end
 end
@@ -78,9 +84,9 @@ let process_line buffer line =
   let* typ = Json.assoc_get "type" assoc >>= Json.as_string in
   match typ with
   | "group_list" ->
-    let* data = Json.assoc_get "data" assoc in
-    let+ groups = Group.parse_group_list data in
-    List.iter Groups.update groups
+    let* group_list = Json.assoc_get "data" assoc >>= GroupList.of_yojson in
+    let* () = try_list_iter (fun gi -> Groups.update (V1 gi)) group_list.groups in
+    try_list_iter (fun gi -> Groups.update (V2 gi)) group_list.groupsv2
   | "contact_list" ->
     let* data = Json.assoc_get "data" assoc in
     let+ contacts = Contact.parse_contact_list data in

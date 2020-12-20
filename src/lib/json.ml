@@ -1,4 +1,4 @@
-include Yojson.Basic
+include Yojson.Safe
 
 
 (** {2 Error reporting} *)

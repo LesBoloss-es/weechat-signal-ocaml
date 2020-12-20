@@ -8,4 +8,4 @@ type t = {
   revision:           int option            [@default None];
   timer:              int option            [@default None];
   title:              string option         [@default None];
-} [@@deriving of_yojson]
+} [@@deriving of_yojson, show]

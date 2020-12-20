@@ -1,0 +1,3 @@
+(library
+ (public_name weechat-signal-ocaml.helpers)
+ (name helpers))

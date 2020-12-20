@@ -1,59 +1,32 @@
-open Syntax
+open Api
 
-type version = V1 | V2
-
-type t = {
-  version: version;
-  title: string;
-  id: string;
-}
-
-let make ~version ~title ~id =
-  {version; title; id}
-
-(** {2 Pretty printing} *)
-
-(** Mostly for debugging purpose *)
-
-let pp_version fmt = function
-  | V1 -> Format.pp_print_string fmt "V1"
-  | V2 -> Format.pp_print_string fmt "V2"
-
-let pp fmt g =
-  Format.fprintf fmt
-    "Group%a(%s, %s)"
-    pp_version g.version
-    g.id
-    g.title
+type t =
+  | V1 of GroupInfo.t
+  | V2 of GroupV2Info.t
 
 
-(** {2 Signald parsing} *)
+(** {2 Debug pretty printing} *)
 
-let parse_v1 json =
-  let* assoc = Json.as_assoc json in
-  let* title = Json.assoc_get "name" assoc in
-  let* id = Json.assoc_get "groupId" assoc in
-  let+ title = Json.as_string title
-  and+ id = Json.as_string id in
-  {title; version = V1; id}
+let pp fmt = function
+  | V1 gi -> Format.fprintf fmt "GroupV1(%a)" GroupInfo.pp gi
+  | V2 gi -> Format.fprintf fmt "GroupV2(%a)" GroupV2Info.pp gi
 
-let parse_v2 json =
-  let* assoc = Json.as_assoc json in
-  let* title = Json.assoc_get "title" assoc in
-  let* id = Json.assoc_get "id" assoc in
-  let+ title = Json.as_string title
-  and+ id = Json.as_string id in
-  {title; version = V2; id}
 
-let parse_group_list json =
-  let* assoc = Json.as_assoc json in
-  let+ groupsv1 =
-    (Json.assoc_get "groups" assoc <|> Ok (`Assoc []))
-    >>= Json.as_list
-    >>= try_list parse_v1
-  and+ groupsv2 =
-    (Json.assoc_get "groupsv2" assoc <|> Ok (`Assoc []))
-    >>= Json.as_list
-    >>= try_list parse_v2
+(** {2 Some getters} *)
+
+let id g = match g with
+  | V1 gi -> Ok (gi.groupId)
+  | V2 gi ->
+    match gi.id with
+    | Some id -> Ok id
+    | None -> Helpers.error "Group without an id: %a" pp g
+
+let title g =
+  let title_opt = match g with
+    | V1 gi -> gi.name
+    | V2 gi -> gi.title
   in
-  groupsv1 @ groupsv2
+  match title_opt with
+    | Some title -> Ok title
+    | None -> Helpers.error "Group without a title: %a" pp g
+

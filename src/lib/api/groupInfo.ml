@@ -4,4 +4,4 @@ type t = {
   name:     string option         [@default None];
   typ:      string                [@key "type"];
   avatarId: Int64.t option        [@default None];
-} [@@deriving of_yojson]
+} [@@deriving of_yojson, show]

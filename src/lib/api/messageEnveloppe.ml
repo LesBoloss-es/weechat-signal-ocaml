@@ -1,5 +1,3 @@
-open Syntax
-
 type low_level = {
   username: string;
 
@@ -52,6 +50,7 @@ type t = {
 }
 
 let of_yojson json =
+  let open Helpers.Syntax in
   let* ll = low_level_of_yojson json in
   let+ message =
     match ll.callMessage, ll.dataMessage, ll.receipt, ll.syncMessage, ll.typing
