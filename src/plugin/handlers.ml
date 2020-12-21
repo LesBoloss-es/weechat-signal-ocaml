@@ -4,6 +4,18 @@ open Helpers.Syntax
 open Api
 open Signal
 
+(* version: version information from signald *)
+
+let version buffer assoc =
+  let+ version = Json.assoc_get "data" assoc >>= VersionMessage.of_yojson in
+  let info =
+    match Weechat.prefix "network" with
+    | None -> ""
+    | Some info -> info
+  in
+  Weechat.printf buffer "%s%s version %s (branch: %s, commit: %s)"
+    info version.name version.version version.branch version.commit
+
 (* subscribed: info from signald *)
 
 let subscribed buffer =
