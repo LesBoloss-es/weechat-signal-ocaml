@@ -8,27 +8,23 @@ open Signal
 
 let version buffer assoc =
   let+ version = Json.assoc_get "data" assoc >>= VersionMessage.of_yojson in
-  let info =
-    match Weechat.prefix "network" with
-    | None -> ""
-    | Some info -> info
-  in
+  let info = Weechat.prefix "network" in
   Weechat.printf buffer "%s%s version %s (branch: %s, commit: %s)"
     info version.name version.version version.branch version.commit
 
 (* subscribed: info from signald *)
 
 let subscribed buffer =
-  match Weechat.prefix "network" with
-  | Some info -> Ok (Weechat.printf buffer "%ssubscribed" info)
-  | None -> Error "Weechat.prefix error"
+  let info = Weechat.prefix "network" in
+  Weechat.printf buffer "%ssubscribed" info;
+  Ok ()
 
 (* listen_started: info from signald *)
 
 let listen_started buffer =
-  match Weechat.prefix "network" with
-  | Some info -> Ok (Weechat.printf buffer "%slisten started" info)
-  | None -> Error "Weechat.prefix error"
+  let info = Weechat.prefix "network" in
+  Weechat.printf buffer "%slisten started" info;
+  Ok ()
 
 (* group_list: update the list of known groups *)
 

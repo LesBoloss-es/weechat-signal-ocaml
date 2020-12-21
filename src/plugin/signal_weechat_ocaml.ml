@@ -47,12 +47,10 @@ let plugin_init () =
       (fun _ -> 0)
   in
 
-  let error =
-    let print = match Weechat.prefix "error" with
-      | Some error -> Weechat.printf main_buffer "%s%s" error
-      | None -> Weechat.printf main_buffer "%s"
-    in
-    fun msg -> print msg; -1
+  let error msg =
+    let prefix = Weechat.prefix "error" in
+    Weechat.printf main_buffer "%s%s" prefix msg;
+    -1
   in
 
   let socket = Socket.create "/run/signald/signald.sock" in
