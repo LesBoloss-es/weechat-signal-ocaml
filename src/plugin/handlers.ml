@@ -92,5 +92,5 @@ let message assoc =
   | Data dm -> handle_data_message sender dm
   | Sync sm -> handle_sync_message sender sm
   | Call _ -> Error "Ignoring CallMessage"
-  | Receipt _ -> Error "Ignoring ReceiptMessage"
-  | Typing _ -> Error "Ignoring TypingMessage"
+  (* Ignore receipts and typing messages *)
+  | (Receipt _ | Typing _) -> Ok()
