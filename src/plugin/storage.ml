@@ -5,6 +5,27 @@ open Weechat_api
 
 let username = ref ""
 
+module Messages = struct
+  let table: (Int64.t, string) Hashtbl.t = Hashtbl.create 1063
+
+  let add ts text =
+    let text =
+      if String.length text < 200 then text
+      else begin
+        let s = Bytes.create 200 in
+        Bytes.blit_string text 0 s 0 197;
+        Bytes.blit_string "..." 0 s 197 3;
+        Bytes.unsafe_to_string s
+      end
+    in
+    Hashtbl.replace table ts text
+
+  let get ts =
+    match Hashtbl.find_opt table ts with
+    | None -> Error "message not found"
+    | Some text -> Ok text
+end
+
 module Contacts = struct
   let table = Hashtbl.create 17
 

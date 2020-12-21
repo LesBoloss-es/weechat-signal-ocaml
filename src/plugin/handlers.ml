@@ -53,6 +53,15 @@ let contact_list assoc =
 
 (* message: handle the various kinds of messages *)
 
+let render_address (addr: Address.t) =
+  match Storage.Contacts.get addr with
+  | Ok (c, _) -> ContactInfo.nice_name c
+  | Error _ ->
+    match addr.number, addr.uuid with
+    | Some n, _ -> Ok n
+    | None, Some uuid -> Ok uuid
+    | None, None -> Error "Cannot render address"
+
 (** Choose a buffer based on a contact / groupV1 / groupV2 *)
 let select_buffer (addr: Address.t option)
                   (g1: GroupInfo.t option)
@@ -65,12 +74,24 @@ let select_buffer (addr: Address.t option)
     | _ -> Error "Could not find a buffer for this message"
 
 let render_data_message buffer sender (dm: DataMessage.t) =
-  match dm.attachments, dm.sticker, dm.reaction, dm.body with
-  | (_ :: _), _, _, _ -> Error "Not implemented: attachments"
-  | _, Some _, _, _ -> Error "Not implemented: stickers"
-  | _, _, Some _, _ -> Error "Not implemented: reactions"
-  | _, _, _, Some body -> Ok (Weechat.printf buffer "%s\t%s" sender body)
-  | _ -> Error "Weird message with nothing inside"
+  let+ text =
+    match dm.attachments, dm.sticker, dm.reaction, dm.body with
+    | (_ :: _), _, _, _ -> Error "Not implemented: attachments"
+    | _, Some _, _, _ -> Error "Not implemented: stickers"
+    | _, _, Some reaction, _ ->
+      let old_msg =
+        match Storage.Messages.get reaction.targetSentTimestamp with
+        | Ok msg -> "\"" ^ msg ^ "\""
+        | Error _ -> "a message"
+      in
+      let+ old_sender = render_address reaction.targetAuthor in
+      Format.sprintf "reacted %s to %s from %s"
+        reaction.emoji old_msg old_sender
+    | _, _, _, Some body -> Ok body
+    | _ -> Error "Weird message with nothing inside"
+  in
+  Storage.Messages.add dm.timestamp text;
+  Weechat.printf buffer "%s\t%s" sender text
 
 let handle_data_message (sender: ContactInfo.t) (dm: DataMessage.t) =
   let* buffer = select_buffer (Some sender.address) dm.group dm.groupV2 in
