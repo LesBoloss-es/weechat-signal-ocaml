@@ -1,5 +1,6 @@
-type t = unit
-(* TODO *)
-
-let of_yojson _ =
-  Error "Not implemented: Reaction"
+type t = {
+  emoji:               string;
+  remove:              bool;
+  targetAuthor:        Address.t;
+  targetSentTimestamp: Int64.t;
+} [@@deriving of_yojson]
