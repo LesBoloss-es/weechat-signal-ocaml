@@ -102,27 +102,27 @@ let render_data_message buffer sender (dm: DataMessage.t) =
   Storage.Messages.add dm.timestamp text;
   Weechat.printf buffer "%s\t%s%s" sender quote text
 
-let handle_data_message (sender: ContactInfo.t) (dm: DataMessage.t) =
-  let* buffer = select_buffer (Some sender.address) dm.group dm.groupV2 in
-  let* name = ContactInfo.nice_name sender in
-  render_data_message buffer name dm
+let handle_data_message (sender: Address.t) (dm: DataMessage.t) =
+  let* buffer = select_buffer (Some sender) dm.group dm.groupV2 in
+  let* sender = render_address sender in
+  render_data_message buffer sender dm
 
-let handle_sync_message (sender: ContactInfo.t) (sm: SyncMessage.t) =
+let handle_sync_message (sender: Address.t) (sm: SyncMessage.t) =
   match sm with
   | ReadMessages _ -> Ok () (* Ignore read receipts *)
   | Sent stm ->
     let dm = stm.message in
     let* buffer = select_buffer stm.destination dm.group dm.groupV2 in
-    let* sender = render_address sender.address in
+    let* sender = render_address sender in
     render_data_message buffer sender dm
   | _ -> Helpers.error "Unimplemented kind of SyncMessage"
 
 let message assoc =
   let* data = Json.assoc_get "data" assoc in
   let* env = MessageEnveloppe.of_yojson data in
-  let* sender, _ =
+  let* sender =
     match env.source with
-    | Some a -> Storage.Contacts.get a
+    | Some addr -> Ok addr
     | None -> Error "Unknown sender"
   in
   match env.message with
