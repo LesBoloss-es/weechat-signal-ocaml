@@ -1,4 +1,5 @@
-type t = unit
-
-let of_yojson _ =
-  Error "Not implemented: typingMessage"
+type t = {
+  action:    string;
+  groupId:   string option [@default None];
+  timestamp: Int64.t;
+} [@@deriving of_yojson]
