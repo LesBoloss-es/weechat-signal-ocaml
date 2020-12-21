@@ -3,7 +3,7 @@ type t = {
   members:  Address.t list option [@default None];
   name:     string option         [@default None];
   typ:      string option         [@key "type"] [@default None];
-  avatarId: Int64.t;
+  avatarId: Int64.t option        [@default None];
 } [@@deriving of_yojson, show]
 
 
