@@ -3,12 +3,17 @@ open Signal
 open Helpers.Syntax
 open Weechat_api
 
+let username = ref ""
+
 module Contacts = struct
   let table = Hashtbl.create 17
 
   let update (c: ContactInfo.t) =
     let* number = Address.number c.address in
-    let+ name = ContactInfo.nice_name c in
+    let+ name =
+      if number = !username then Ok "Note to self"
+      else ContactInfo.nice_name c
+    in
     match Hashtbl.find_opt table number with
     | None ->
       let buffer = Weechat.buffer_new
@@ -62,5 +67,3 @@ module Groups = struct
     | None -> Error "Group not found"
     | Some (g, b) -> Ok (g, b)
 end
-
-let username = ref ""
