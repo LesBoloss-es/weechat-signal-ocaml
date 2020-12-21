@@ -50,13 +50,16 @@ let contact_list assoc =
 (* message: handle the various kinds of messages *)
 
 let render_address (addr: Address.t) =
-  match Storage.Contacts.get addr with
-  | Ok (c, _) -> ContactInfo.nice_name c
-  | Error _ ->
-    match addr.number, addr.uuid with
-    | Some n, _ -> Ok n
-    | None, Some uuid -> Ok uuid
-    | None, None -> Error "Cannot render address"
+  match addr.number with
+  | Some num when num = !Storage.username -> Ok "Me"
+  | _ ->
+    match Storage.Contacts.get addr with
+    | Ok (c, _) -> ContactInfo.nice_name c
+    | Error _ ->
+      match addr.number, addr.uuid with
+      | Some n, _ -> Ok n
+      | None, Some uuid -> Ok uuid
+      | None, None -> Error "Cannot render address"
 
 (** Choose a buffer based on a contact / groupV1 / groupV2 *)
 let select_buffer (addr: Address.t option)
@@ -69,7 +72,17 @@ let select_buffer (addr: Address.t option)
     | Some addr, _, _ -> snd <$> Storage.Contacts.get addr
     | _ -> Error "Could not find a buffer for this message"
 
+let render_quote (q: Quote.t) =
+  Format.sprintf "%s> %s%s\n"
+    (Weechat.color "lightblue")
+    q.text
+    (Weechat.color "reset")
+
 let render_data_message buffer sender (dm: DataMessage.t) =
+  let quote = match dm.quote with
+    | Some quote -> render_quote quote
+    | None -> ""
+  in
   let+ text =
     match dm.attachments, dm.sticker, dm.reaction, dm.body with
     | (_ :: _), _, _, _ -> Error "Not implemented: attachments"
@@ -87,7 +100,7 @@ let render_data_message buffer sender (dm: DataMessage.t) =
     | _ -> Error "Weird message with nothing inside"
   in
   Storage.Messages.add dm.timestamp text;
-  Weechat.printf buffer "%s\t%s" sender text
+  Weechat.printf buffer "%s\t%s%s" sender quote text
 
 let handle_data_message (sender: ContactInfo.t) (dm: DataMessage.t) =
   let* buffer = select_buffer (Some sender.address) dm.group dm.groupV2 in
@@ -100,13 +113,8 @@ let handle_sync_message (sender: ContactInfo.t) (sm: SyncMessage.t) =
   | Sent stm ->
     let dm = stm.message in
     let* buffer = select_buffer stm.destination dm.group dm.groupV2 in
-    let* number = Address.number sender.address in
-    let* name =
-      if number = !Storage.username
-      then Ok "Me"
-      else ContactInfo.nice_name sender
-    in
-    render_data_message buffer name dm
+    let* sender = render_address sender.address in
+    render_data_message buffer sender dm
   | _ -> Helpers.error "Unimplemented kind of SyncMessage"
 
 let message assoc =
