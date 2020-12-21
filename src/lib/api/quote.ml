@@ -1,5 +1,7 @@
-type t = unit
-(* TODO *)
-
-let of_yojson _ =
-  Error "Not implemented: Quote"
+type t = {
+  attachments: QuotedAttachment.t list [@default []];
+  author:      Address.t;
+  id:          Int64.t;
+  mentions:    Mention.t list          [@default []];
+  text:        string;
+} [@@deriving of_yojson]
