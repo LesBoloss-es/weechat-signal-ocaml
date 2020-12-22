@@ -1,5 +1,4 @@
-type t = unit
-(* TODO *)
-
-let of_yojson _ =
-  Error "Not implemented: ReadMessage"
+type t = {
+  sender: Address.t;
+  timestamp: Int64.t;
+} [@@deriving of_yojson]
