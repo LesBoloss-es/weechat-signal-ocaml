@@ -54,6 +54,7 @@ let plugin_init () =
   in
 
   let socket = Socket.create "/run/signald/signald.sock" in
+  Storage.socket := Some socket;
 
   let _ = Weechat.hook_command
     "signal"

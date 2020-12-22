@@ -4,6 +4,7 @@ open Helpers.Syntax
 open Weechat_api
 
 let username = ref ""
+let socket = ref None
 
 module Messages = struct
   let table: (Int64.t, string) Hashtbl.t = Hashtbl.create 1063
@@ -26,6 +27,25 @@ module Messages = struct
     | Some text -> Ok text
 end
 
+let send_callback destination buffer text =
+  if !username = ""
+  then begin
+    Weechat.printf buffer "[please subscribe first]";
+    -1
+  end else match !socket with
+    | None ->
+      Weechat.printf buffer "[socket not found]";
+      -1
+    | Some sock ->
+      let username = !username in
+      match Action.send ~destination ~messageBody:(Some text) ~username sock with
+      | Ok () ->
+        Weechat.printf buffer "Me\t%s" text;
+        0
+      | Error err ->
+        Weechat.printf buffer "%s%s" (Weechat.prefix "error") err;
+        -1
+
 module Contacts = struct
   let table = Hashtbl.create 17
 
@@ -39,9 +59,7 @@ module Contacts = struct
     | None ->
       let buffer = Weechat.buffer_new
         name
-        (fun buffer _ ->
-          Weechat.printf buffer "[writing to contact not yet implemented]";
-          0)
+        (send_callback (Address c.address))
         (fun _ -> 0)
       in
       Hashtbl.add table number (c, buffer)
@@ -70,9 +88,7 @@ module Groups = struct
       let buffer =
         Weechat.buffer_new
           title
-          (fun buffer _ ->
-            Weechat.printf buffer "[writing to group not yet implemented]";
-            0)
+          (send_callback (Group group))
           (fun _ -> 0)
       in
       Hashtbl.add table id (group, buffer)
