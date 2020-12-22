@@ -8,21 +8,8 @@ let signal_command_cb socket buffer argv argv_eol =
   let argc = Array.length argv in
   if argc < 2 then Error "/signal: argument required"
   else match argv.(1) with
-    | "subscribe" ->
-      if argc <> 3 then Error "/signal subscribe: wrong number of arguments"
-      else begin
-        Storage.username := argv.(2);
-        let* () = Socket.subscribe socket !Storage.username in
-        let* () = Socket.list_groups socket !Storage.username in
-        Socket.list_contacts socket !Storage.username
-      end
-    | "sync" ->
-      if argc <> 2 then Error "/signal sync: wrong number of arguments"
-      else if !Storage.username = "" then Error "Please subscribe first"
-      else
-        let* () = Socket.list_groups socket !Storage.username in
-        let* () = Socket.list_contacts socket !Storage.username in
-        Ok ()
+    | "subscribe" -> Commands.subscribe socket argv
+    | "sync" -> Commands.sync socket argv
     | _ -> Error "/signal: invalid argument"
 
 let process_line buffer line =
