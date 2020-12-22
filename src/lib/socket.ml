@@ -11,7 +11,7 @@ let create path =
 let close sock = close_in sock.ic
 
 
-let print_line sock =
+let print_eol sock =
   Format.kasprintf
     (fun s ->
       try
@@ -21,12 +21,14 @@ let print_line sock =
       with Unix.Unix_error _ as e ->
         Error (Printexc.to_string e))
 
+let print_json sock json =
+  print_eol sock "%s" (Json.to_string json)
 
 let subscribe sock username =
-  print_line sock {|{"type": "subscribe", "username": "%s"}|} username
+  print_eol sock {|{"type": "subscribe", "username": "%s"}|} username
 
 let list_groups sock username =
-  print_line sock {|{"type": "list_groups", "username": "%s"}|} username
+  print_eol sock {|{"type": "list_groups", "username": "%s"}|} username
 
 let list_contacts sock username =
-  print_line sock {|{"type": "list_contacts", "username": "%s"}|} username
+  print_eol sock {|{"type": "list_contacts", "username": "%s"}|} username
