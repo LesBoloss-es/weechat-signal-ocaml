@@ -100,8 +100,12 @@ let render_data_message buffer sender (dm: DataMessage.t) =
         | Error _ -> "a message"
       in
       let+ old_sender = render_address reaction.targetAuthor in
-      Format.sprintf "reacted %s to %s from %s"
-        reaction.emoji old_msg old_sender
+      let lightblue = Weechat.color "lightblue" in
+      let reset = Weechat.color "reset" in
+      Format.sprintf "reacted with %s to %s%s%s from %s"
+        reaction.emoji
+        lightblue old_msg reset
+        old_sender
     | _, _, _, Some body -> Ok body
     | _ -> Error "Weird message with nothing inside"
   in
