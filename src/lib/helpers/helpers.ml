@@ -35,6 +35,7 @@ module Syntax = struct
 
   let (>>=) = Result.bind
   let (<$>) = Result.map
+  let (<&>) x f = f <$> x
 
   (* or_else *)
   let (<|>) x y =

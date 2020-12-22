@@ -54,7 +54,11 @@ let render_address (addr: Address.t) =
   | Some num when num = !Storage.username -> Ok "Me"
   | _ ->
     match Storage.Contacts.get addr with
-    | Ok (c, _) -> ContactInfo.nice_name c
+    | Ok (c, _) ->
+      begin match c.address.number with
+        | Some num when num = !Storage.username -> Ok "Me"
+        | _ -> ContactInfo.nice_name c
+      end
     | Error _ ->
       match addr.number, addr.uuid with
       | Some n, _ -> Ok n
@@ -73,15 +77,17 @@ let select_buffer (addr: Address.t option)
     | _ -> Error "Could not find a buffer for this message"
 
 let render_quote (q: Quote.t) =
-  Format.sprintf "%s> %s%s\n"
+  let+ author = render_address q.author in
+  Format.sprintf "%s[%s] > %s%s\n"
     (Weechat.color "lightblue")
+    author
     q.text
     (Weechat.color "reset")
 
 let render_data_message buffer sender (dm: DataMessage.t) =
-  let quote = match dm.quote with
+  let* quote = match dm.quote with
     | Some quote -> render_quote quote
-    | None -> ""
+    | None -> Ok ""
   in
   let+ text =
     match dm.attachments, dm.sticker, dm.reaction, dm.body with
