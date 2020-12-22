@@ -47,10 +47,33 @@ let send_callback destination buffer text =
         -1
 
 module Contacts = struct
+  let by_uuid = Hashtbl.create 17
   let table = Hashtbl.create 17
+
+  (** Internal stuff *)
+
+  let not_found = Error "Contact not found"
+  let to_result opt = Option.fold ~none:not_found ~some:Result.ok opt
+
+  let add_uuid_if_missing (addr: Address.t) =
+    match addr.uuid, addr.number with
+    | (None, _ | _, None) -> ()
+    | Some uuid, Some number ->
+      match Hashtbl.find_opt by_uuid uuid with
+      | Some _ -> ()
+      | None -> Hashtbl.add by_uuid uuid number
+
+  let get_number (addr: Address.t) =
+    match addr.number, addr.uuid with
+    | Some number, _ -> Ok number
+    | None, Some uuid -> Hashtbl.find_opt by_uuid uuid |> to_result
+    | None, None -> not_found
+
+  (** Contacts API *)
 
   let update (c: ContactInfo.t) =
     let* number = Address.number c.address in
+    add_uuid_if_missing c.address;
     let+ name =
       if number = !username then Ok "Note to self"
       else ContactInfo.nice_name c
@@ -70,10 +93,8 @@ module Contacts = struct
       end
 
   let get (a: Address.t) =
-    let* number = Address.number a in
-    match Hashtbl.find_opt table number with
-    | None -> Error "Contact not found"
-    | Some (c, b) -> Ok (c, b)
+    let* number = get_number a in
+    Hashtbl.find_opt table number |> to_result
 
   let to_seq () = Hashtbl.to_seq table
 end
