@@ -74,6 +74,8 @@ module Contacts = struct
     match Hashtbl.find_opt table number with
     | None -> Error "Contact not found"
     | Some (c, b) -> Ok (c, b)
+
+  let to_seq () = Hashtbl.to_seq table
 end
 
 module Groups = struct
@@ -103,4 +105,6 @@ module Groups = struct
     match Hashtbl.find_opt table id with
     | None -> Error "Group not found"
     | Some (g, b) -> Ok (g, b)
+
+  let to_seq () = Hashtbl.to_seq table
 end

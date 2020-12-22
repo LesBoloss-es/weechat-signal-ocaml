@@ -17,6 +17,14 @@ let rec try_list_iter f = function
     | Ok () -> try_list_iter f xs
     | Error _ as err -> err
 
+let rec try_seq_iter f s =
+  match s () with
+  | Seq.Nil -> Ok ()
+  | Seq.Cons (x, s') ->
+    match f x with
+    | Ok () -> try_seq_iter f s'
+    | Error _ as err -> err
+
 module Syntax = struct
   let (let*) = Result.bind
   let (let+) x f = Result.map f x

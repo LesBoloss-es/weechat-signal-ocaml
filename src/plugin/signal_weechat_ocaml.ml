@@ -10,6 +10,7 @@ let signal_command_cb socket buffer argv argv_eol =
   else match argv.(1) with
     | "subscribe" -> Commands.subscribe socket argv
     | "sync" -> Commands.sync socket argv
+    | "list" -> Commands.list buffer argv
     | _ -> Error "/signal: invalid argument"
 
 let process_line buffer line =
@@ -50,8 +51,8 @@ let plugin_init () =
     "sync: refresh contact and group list\n\
      subscribe: start receiving message for the given account"
      "sync || subscribe"
-     (fun buf argv argv_eol ->
-       match signal_command_cb socket buf argv argv_eol with
+     (fun _ argv argv_eol ->
+       match signal_command_cb socket main_buffer argv argv_eol with
        | Ok () -> 0
        | Error msg -> error msg)
   in
