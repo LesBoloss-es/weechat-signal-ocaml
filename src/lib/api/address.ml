@@ -2,7 +2,7 @@ type t = {
   number: string option [@default None];
   uuid:   string option [@default None];
   relay:  string option [@default None];
-} [@@deriving of_yojson, show]
+} [@@deriving yojson, show]
 
 
 (** {2 Getters} *)

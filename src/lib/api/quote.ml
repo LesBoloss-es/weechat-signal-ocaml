@@ -4,4 +4,4 @@ type t = {
   id:          Int64.t;
   mentions:    Mention.t list          [@default []];
   text:        string;
-} [@@deriving of_yojson]
+} [@@deriving yojson]
