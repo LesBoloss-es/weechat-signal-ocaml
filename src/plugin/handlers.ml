@@ -141,3 +141,4 @@ let message assoc =
   | Call _ -> Error "Ignoring CallMessage"
   (* Ignore receipts and typing messages *)
   | (Receipt _ | Typing _) -> Ok()
+  | Nothing -> Error "Not implemented: MessageEnveloppe of type Nothing"

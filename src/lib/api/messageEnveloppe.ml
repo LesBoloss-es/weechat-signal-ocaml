@@ -28,6 +28,7 @@ type message =
   | Receipt of ReceiptMessage.t
   | Sync of SyncMessage.t
   | Typing of TypingMessage.t
+  | Nothing
 
 type t = {
   username: string;
@@ -60,6 +61,7 @@ let of_yojson json =
     | None,    None,    Some r, None,    None   -> Ok (Receipt r)
     | None,    None,    None,   Some sm, None   -> Ok (Sync sm)
     | None,    None,    None,   None,    Some t -> Ok (Typing t)
+    | None,    None,    None,   None,    None   -> Ok Nothing
     | _ -> Error "invalid message"
   in
   {
