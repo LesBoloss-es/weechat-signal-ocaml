@@ -32,6 +32,12 @@ module Syntax = struct
     match x, y with
     | Ok x, Ok y -> Ok (x, y)
     | (Error e, _ | _, Error e) -> Error e
+  let (let/) x f =
+    match x with
+    | Ok _ -> x
+    | Error msg -> f msg
+
+  (* Infix operators *)
 
   let (>>=) = Result.bind
   let (<$>) = Result.map

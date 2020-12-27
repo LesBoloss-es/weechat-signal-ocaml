@@ -49,21 +49,30 @@ let contact_list assoc =
 
 (* message: handle the various kinds of messages *)
 
+let render_contact (c: ContactInfo.t) =
+  let color =
+    match c.color with
+    | None -> ""
+    | Some c -> Colors.to_weechat c
+  in
+  let+ name =
+    match c.address.number with
+    | Some num when num = !Storage.username -> Ok "Me"
+    | _ -> ContactInfo.nice_name c
+  in
+  color ^ name ^ Weechat.color "reset"
+
 let render_address (addr: Address.t) =
-  match addr.number with
-  | Some num when num = !Storage.username -> Ok "Me"
-  | _ ->
-    match Storage.Contacts.get addr with
-    | Ok (c, _) ->
-      begin match c.address.number with
-        | Some num when num = !Storage.username -> Ok "Me"
-        | _ -> ContactInfo.nice_name c
-      end
-    | Error _ ->
-      match addr.number, addr.uuid with
-      | Some n, _ -> Ok n
-      | None, Some uuid -> Ok uuid
-      | None, None -> Error "Cannot render address"
+  let/ _ =
+    Storage.Contacts.get addr
+    <&> fst
+    >>= render_contact
+  in
+  (* If the above fails, try something less clever. *)
+  match addr.number, addr.uuid with
+  | Some n, _ -> Ok (if n = !Storage.username then "Me" else n)
+  | None, Some uuid -> Ok uuid
+  | None, None -> Error "Failed to render this address"
 
 (** Choose a buffer based on a contact / groupV1 / groupV2 *)
 let select_buffer (addr: Address.t option)
@@ -78,9 +87,9 @@ let select_buffer (addr: Address.t option)
 
 let render_quote (q: Quote.t) =
   let+ author = render_address q.author in
-  Format.sprintf "%s[%s] > %s%s\n"
-    (Weechat.color "lightblue")
-    author
+  let grey = Weechat.color "250" in
+  Format.sprintf "%s[%s%s] > %s%s\n"
+    grey author grey
     q.text
     (Weechat.color "reset")
 
