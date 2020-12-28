@@ -1,5 +1,6 @@
-type t = unit
-(* TODO *)
-
-let of_yojson _ =
-  Error "Not implemented: Sticker"
+type t = {
+  attachment: Attachment.t;
+  packID:     string;
+  packKey:    string;
+  stickerID:  int;
+} [@@deriving of_yojson]
