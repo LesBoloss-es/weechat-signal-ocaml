@@ -146,10 +146,11 @@ let message assoc =
     | Some addr -> Ok addr
     | None -> Error "Unknown sender"
   in
-  match env.message with
-  | Data dm -> handle_data_message sender dm
-  | Sync sm -> handle_sync_message sender sm
-  | Call _ -> Error "Ignoring CallMessage"
   (* Ignore receipts and typing messages *)
-  | (Receipt _ | Typing _) -> Ok()
-  | Nothing -> Error "Not implemented: MessageEnveloppe of type Nothing"
+  if env.typ = "RECEIPT" then Ok ()
+  else match env.message with
+    | (Receipt _ | Typing _) -> Ok ()
+    | Data dm -> handle_data_message sender dm
+    | Sync sm -> handle_sync_message sender sm
+    | Call _ -> Error "Ignoring CallMessage"
+    | Nothing -> Error "Not implemented: MessageEnveloppe of type Nothing"
