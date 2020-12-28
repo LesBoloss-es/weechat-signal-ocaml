@@ -101,7 +101,9 @@ let render_data_message buffer sender (dm: DataMessage.t) =
   let+ text =
     match dm.attachments, dm.sticker, dm.reaction, dm.body with
     | (_ :: _), _, _, _ -> Error "Not implemented: attachments"
-    | _, Some _, _, _ -> Error "Not implemented: stickers"
+    | _, Some sticker, _, _ ->
+      Format.ksprintf Result.ok
+        "sent a sticker (%s / %d)" sticker.packID sticker.stickerID
     | _, _, Some reaction, _ ->
       let old_msg =
         match Storage.Messages.get reaction.targetSentTimestamp with
